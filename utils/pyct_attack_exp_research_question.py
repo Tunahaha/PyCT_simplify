@@ -293,7 +293,7 @@ def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img,model_type="cnn"):
         else:
             s_or_q = "queue"
 
-        for ton_n in [1,2,3]:
+        for ton_n in [3,4,8,16]:
             
             for idx in range(first_n_img):
                 save_exp = {

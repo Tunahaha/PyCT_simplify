@@ -9,8 +9,9 @@ from multiprocessing import Process
 model_name = "imdb_LSTM_08509"
 
 
-NUM_PROCESS = 5
-TIMEOUT = 3600
+NUM_PROCESS = 30
+# TIMEOUT = 3600
+TIMEOUT = 36000
 # TIMEOUT = 172800
 NORM_01 = False
 
@@ -23,7 +24,7 @@ if __name__ == "__main__":
     # inputs = pyct_lstm_stock_1_2_3_4_8_limit_range02(model_name, first_n_img=502)
     # inputs = stock_shap_1_2_3_4_8_limit_range02(model_name, first_n_img=60)
     model_type="cnn"
-    inputs = imdb_shap_1_2_3_4_8_range02(model_name, first_n_img=2,model_type=model_type)
+    inputs = imdb_shap_1_2_3_4_8_range02(model_name, first_n_img=30,model_type=model_type)
     print("#"*40, f"number of inputs: {len(inputs)}", "#"*45)
     time.sleep(3)
 
