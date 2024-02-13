@@ -259,7 +259,6 @@ class ExplorationEngine:
             self.in_out.append((all_args.copy(), result)) # .copy() is important! Think why.
             return True # continue iteration
         answer = self._one_execution_primitive(all_args) # we must measure the coverage in the primitive mode since self.constraints_to_solve would become unpicklable if measured in the concolic mode
-        print("all_args :"+all_args.__repr__())
         if self.Timeout not in (result, answer):
             if result != answer: print('Input:', all_args, '／My result:', result, '／Correct answer:', answer)
             assert result == answer

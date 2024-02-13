@@ -293,12 +293,12 @@ def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img,model_type="cnn"):
         else:
             s_or_q = "queue"
 
-        for ton_n in [3,4,8,16]:
+        for ton_n in [8,16,32]:
             
             for idx in range(first_n_img):
                 save_exp = {
                     "input_name": f"imdb_test_{idx}",
-                    "exp_name": f"limit_{limit_p}/shap_{ton_n}",
+                    "exp_name": f"limit_86400_{limit_p}/shap_{ton_n}",
                     # "save_smt": True
                 }
                 if model_type=="cnn":
@@ -325,7 +325,54 @@ def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img,model_type="cnn"):
                 inputs.append(one_input)
                 
     return inputs
+def imdb_transformer_shap_1_2_3_4_8_range02(model_name, first_n_img,model_type="cnn"):
+    from utils.dataset import IMDB_Dataset
+    from utils.gen_random_pixel_location import lstm_imdb_30
+    
+    imdb_dataset = IMDB_Dataset()
+    test_shap_pixel_sorted = np.load(f'./shap_value/{model_name}/imdb_sort_shap_pixel.npy')
+    limit_p = 0.2
+    
+    inputs = []
 
+    for solve_order_stack in [False]:
+        if solve_order_stack:
+            s_or_q = "stack"
+        else:
+            s_or_q = "queue"
+
+        for ton_n in [1]:
+            
+            for idx in range(first_n_img):
+                save_exp = {
+                    "input_name": f"imdb_test_{idx}",
+                    "exp_name": f"limit_86400_{limit_p}/shap_{ton_n}",
+                    # "save_smt": True
+                }
+                if model_type=="cnn":
+                    save_exp['exp_name']=f"lstm_limit_{limit_p}/shap_{ton_n}"
+
+                save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=False)
+                if os.path.exists(save_dir):
+                    # 已經有紀錄的圖跳過
+                    continue
+                
+                attack_pixels = test_shap_pixel_sorted[idx, :ton_n].tolist()
+                in_dict, con_dict = imdb_dataset.get_imdb_test_data_and_set_condict(idx, attack_pixels)
+                
+                
+                one_input = {
+                    'model_name': model_name,
+                    'in_dict': in_dict,
+                    'con_dict': con_dict,
+                    'solve_order_stack': solve_order_stack,
+                    'save_exp': save_exp,
+                    'limit_change_percentage': limit_p,
+                }
+
+                inputs.append(one_input)
+                
+    return inputs
 # def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img):
 #     from utils.dataset import IMDB_Dataset
 #     from utils.gen_random_pixel_location import lstm_imdb_30

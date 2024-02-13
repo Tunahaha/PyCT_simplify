@@ -493,6 +493,62 @@ class LSTMLayer:
 
 
         return new_h, new_c
+def dot_product_attention(Q, K, V, mask=None, scale=True):
+    attention_scores = [[sum(q * k for q, k in zip(q_row, k_col)) for k_col in zip(*K)] for q_row in Q]
+    
+    if scale:
+        d_k = len(K[0])
+        attention_scores = [[score / np.sqrt(d_k) for score in row] for row in attention_scores]
+    
+    if mask is not None:
+        attention_scores = [[score if not m else float('-inf') for score, m in zip(row, mask_row)] for row, mask_row in zip(attention_scores, mask)]
+    
+    attention_weights = [[np.exp(score) for score in row] for row in attention_scores]
+    sum_weights = [sum(row) for row in attention_weights]
+    attention_weights = [[score / sum_row for score in row] for row, sum_row in zip(attention_weights, sum_weights)]
+    
+    output = [[sum(w * v for w, v in zip(row, col)) for col in zip(*V)] for row in attention_weights]
+    return output, attention_weights
+
+class MultiHeadAttention:
+    def __init__(self, num_heads, model_dim):
+        assert model_dim % num_heads == 0
+        self.num_heads = num_heads
+        self.model_dim = model_dim
+        self.depth = model_dim // num_heads
+        
+        # Initialize weights to random values
+        self.WQ = [[np.random.rand() for _ in range(model_dim)] for _ in range(model_dim)]
+        self.WK = [[np.random.rand() for _ in range(model_dim)] for _ in range(model_dim)]
+        self.WV = [[np.random.rand() for _ in range(model_dim)] for _ in range(model_dim)]
+        self.WO = [[np.random.rand() for _ in range(model_dim)] for _ in range(num_heads * self.depth)]
+    
+    def split_heads(self, x, batch_size):
+        x = [x[i:i + self.depth] for i in range(0, len(x), self.depth)]
+        return [list(x[i::self.num_heads]) for i in range(self.num_heads)]
+    
+    def forward(self, Q, K, V, mask):
+        batch_size = len(Q)
+        
+        Q = [self.split_heads(self.matmul(q, self.WQ), batch_size) for q in Q]
+        K = [self.split_heads(self.matmul(k, self.WK), batch_size) for k in K]
+        V = [self.split_heads(self.matmul(v, self.WV), batch_size) for v in V]
+        
+        attention_outputs = [dot_product_attention(q, k, v, None, True) for q, k, v in zip(Q, K, V)]
+        
+        concat_attention = [self.concat_heads(output) for output, _ in attention_outputs]
+        
+        output = [self.matmul(head, self.WO) for head in concat_attention]
+        return output
+    
+    def matmul(self, A, B):
+        return [[sum(a * b for a, b in zip(A_row, B_col)) for B_col in zip(*B)] for A_row in A]
+    
+    def concat_heads(self, heads):
+        return [val for sublist in zip(*heads) for val in sublist]
+
+
+
 
 
 
@@ -557,5 +613,12 @@ class NNModel:
         elif type(layer) == LSTM:
             input_dim = layer.input_shape[-1]
             self.layers.append(LSTMLayer(input_dim, weights=layer.get_weights()))
+        elif type(layer) == MultiHeadAttention:
+            num_heads = layer.get_config()['num_heads']
+            model_dim = layer.get_config()['model_dim']
+            self.layers.append(MultiHeadAttention(num_heads, model_dim))
+
+
+
         else:
             raise NotImplementedError()

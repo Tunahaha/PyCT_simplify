@@ -7,24 +7,27 @@ from multiprocessing import Process
 # model_name = "stock_LSTM_08804"
 # model_name = "stock_LSTM_DenseF_day20_09262"
 model_name = "imdb_LSTM_08509"
+# model_name="IMDB_transformer_83905"
 
 
-NUM_PROCESS = 30
-# TIMEOUT = 3600
-TIMEOUT = 36000
+NUM_PROCESS = 5
+# TIMEOUT = 18000
+# TIMEOUT = 36000
+# TIMEOUT = 36000
+TIMEOUT=86400
 # TIMEOUT = 172800
 NORM_01 = False
 
 if __name__ == "__main__":
     from utils.pyct_attack_exp import run_multi_attack_subprocess_wall_timeout
     from utils.pyct_attack_exp_research_question import (        
-        stock_shap_1_2_3_4_8_limit_range02,imdb_shap_1_2_3_4_8_range02
+        stock_shap_1_2_3_4_8_limit_range02,imdb_shap_1_2_3_4_8_range02,imdb_transformer_shap_1_2_3_4_8_range02
     )
     # inputs = pyct_lstm_stock_1_4_8_16_32_only_first_forward(model_name, first_n_img=502)
     # inputs = pyct_lstm_stock_1_2_3_4_8_limit_range02(model_name, first_n_img=502)
     # inputs = stock_shap_1_2_3_4_8_limit_range02(model_name, first_n_img=60)
-    model_type="cnn"
-    inputs = imdb_shap_1_2_3_4_8_range02(model_name, first_n_img=30,model_type=model_type)
+    model_type="tnn"
+    inputs = imdb_shap_1_2_3_4_8_range02(model_name, first_n_img=10,model_type=model_type)
     print("#"*40, f"number of inputs: {len(inputs)}", "#"*45)
     time.sleep(3)
 

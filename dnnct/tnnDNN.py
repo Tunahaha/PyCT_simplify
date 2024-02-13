@@ -708,6 +708,13 @@ class LSTMLayer:
             return 0
         else:
             return -input
+    # def adjusted_input(self, input, weight, delta):
+    #     if weight > 0:
+    #         return input
+    #     elif weight <0:
+    #         return -input
+    #     else:
+    #         return 0
 
 
 class NNModel:
